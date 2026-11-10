@@ -3,17 +3,15 @@
 
 StartPage::StartPage(QWidget *parent) {
     auto * layout = new QVBoxLayout(this);
-
-    auto * label = new QLabel;
-    auto * quizBtn = new QPushButton;
-
+    label = new QLabel;
     label->setText("abacaba");
-    quizBtn->setText("Начать Квиз");
-
     layout->addWidget(label);
-    layout->addWidget(quizBtn);
-
-    connect(quizBtn, &QPushButton::clicked, this, [this] {
-        emit goToQuiz();
-    });
+    for (int i = 1; i <= 5; ++i) {
+        auto * quizBtn = new QPushButton(QString("Квиз %1").arg(i), this);
+        const QString name = QString("questions_data_%1.json").arg(i);
+        connect(quizBtn, &QPushButton::clicked, this, [this, name] {
+            emit goToQuiz(name);
+        });
+        layout->addWidget(quizBtn);
+    }
 }

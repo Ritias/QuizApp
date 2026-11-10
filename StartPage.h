@@ -10,8 +10,8 @@ class StartPage : public QWidget {
     Q_OBJECT
 public:
     explicit StartPage(QWidget *parent = nullptr);
-    signals:
-    void goToQuiz();
+signals:
+    void goToQuiz(const QString &file);
 private:
     QLabel *label;
     QPushButton *quizBtn;

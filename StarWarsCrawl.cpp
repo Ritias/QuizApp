@@ -503,3 +503,12 @@ void StarWarsCrawl::paintEvent(QPaintEvent *event)
 
     painter.restore();
 }
+void StarWarsCrawl::hideEvent(QHideEvent *event)
+{
+    QWidget::hideEvent(event);
+    started_ = false;
+    finishedEmitted_ = false;
+    progress_ = 0.0;
+    timer_.stop();
+    update();
+}

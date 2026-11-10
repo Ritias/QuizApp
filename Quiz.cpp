@@ -26,10 +26,15 @@ void Quiz::setupUI() {
     stack->setCurrentWidget(start);
 }
 void Quiz::setupConnections() {
-    connect(start, &StartPage::goToQuiz, this, [this](){
-        stack->setCurrentWidget(quiz);
-    });
+    connect(start, &StartPage::goToQuiz, this, &Quiz::onGoToQuiz);
     connect(quiz, &QuizPage::goToEnd, this, [this]() {
         stack->setCurrentWidget(end);
     });
+    connect(end, &EndPage::goToStart, this, [this]() {
+        stack->setCurrentWidget(start);
+    });
+}
+void Quiz::onGoToQuiz(const QString &file) {
+    quiz->loadQuiz(file);
+    stack->setCurrentWidget(quiz);
 }

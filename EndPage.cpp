@@ -10,4 +10,8 @@ EndPage::EndPage(QWidget *parent) {
     layout->addWidget(label);
     auto * swc = new StarWarsCrawl();
     layout->addWidget(swc);
+    auto * menu = new QPushButton("Главное меню", this);
+    connect(menu, &QPushButton::clicked,this,[this](){
+        emit goToStart();
+    });
 }

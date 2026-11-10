@@ -19,4 +19,6 @@ private:
     StartPage* start;
     QuizPage* quiz;
     EndPage* end;
+private slots:
+    void onGoToQuiz(const QString &file);
 };

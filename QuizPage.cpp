@@ -1,5 +1,4 @@
 #include "QuizPage.h"
-
 #include <QVBoxLayout>
 #include <QFile>
 #include <QJsonObject>
@@ -11,14 +10,6 @@ QuizPage::QuizPage(QWidget *parent) {
     setupSounds();
     auto * layout = new QVBoxLayout(this);
     auto * ansLayout = new QHBoxLayout;
-
-    QString path = QCoreApplication::applicationDirPath() + "/assets/questions_data.json";
-    if (!QFile::exists(path)) {
-        qWarning() << "File not found at:" << path;
-        return;
-    }
-    loadFromJson(path);
-
     answers = QList<Answer*>();
     for (int i = 0; i < 5; i++) {
         answers.append(new Answer(nullptr, i + 1));
@@ -30,7 +21,6 @@ QuizPage::QuizPage(QWidget *parent) {
     nextBtn = new QPushButton("Дальше", this);
     nextBtn->hide();
 
-    loadQuestion(0);
     layout->addWidget(questionLabel);
     layout->addLayout(ansLayout);
     layout->addWidget(nextBtn);
@@ -45,11 +35,10 @@ QuizPage::QuizPage(QWidget *parent) {
             }
         });
     }
-
     connect(nextBtn, &QPushButton::clicked, this, [this]() {
         nextBtn->hide();
         index++;
-        if (index >= 5) {
+        if (index >= questions.size()) {
             emit goToEnd();
         } else {
             loadQuestion(index);
@@ -74,6 +63,11 @@ void QuizPage::loadFromJson(const QString &jsonFilePath) {
 }
 
 void QuizPage::loadQuestion(int ind) {
+    if (ind < 0 || ind >= questions.size()) {
+        qWarning() << "loadQuestion: bad index" << ind
+                   << "size =" << questions.size();
+        return;
+    }
     QJsonObject cur = questions.at(ind);
     questionLabel->setText(cur.value("question").toString());
     QList<QString> answers_front;
@@ -116,4 +110,21 @@ void QuizPage::playGood() {
 void QuizPage::playBad() {
     badPlayer->setPosition(0);
     badPlayer->play();
+}
+void QuizPage::loadQuiz(const QString &filename) {
+    questions.clear();
+    index = 0;
+    nextBtn->hide();
+    questionLabel->setText(QString());
+    for (auto *a : answers)
+        a->setNewAnswer(QString(), QString());
+    const QString path =
+        QCoreApplication::applicationDirPath() + "/assets/" + filename;
+    qDebug() << "Loading quiz file:" << path;
+    loadFromJson(path);
+    if (questions.isEmpty()) {
+        questionLabel->setText(tr("File is empty: %1").arg(filename));
+        return;
+    }
+    loadQuestion(0);
 }

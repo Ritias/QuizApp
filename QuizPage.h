@@ -9,9 +9,10 @@
 
 class QuizPage : public QWidget {
     Q_OBJECT
-    public:
+public:
     explicit QuizPage(QWidget *parent = nullptr);
-    signals:
+    void loadQuiz(const QString &file);
+signals:
     void goToEnd();
 private:
     QLabel * questionLabel;
