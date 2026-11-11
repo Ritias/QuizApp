@@ -1,23 +1,25 @@
 #include "Answer.h"
 
+#include <QEvent>
 #include <QFontMetrics>
+#include <QHBoxLayout>
+#include <QSizePolicy>
 #include <QVBoxLayout>
 
 void Answer::fitLabelText()
 {
-    if (!btnLabel)
+    if (!btnLabel || !answerBtn)
         return;
 
-    const int maxW = btnLabel->width();
-    const int maxH = btnLabel->height();
-    if (maxW <= 0 || maxH <= 0)
-        return;
+    const int padding = qMax(12, answerBtn->width() / 14);
+    const int maxW = qMax(1, answerBtn->width() - padding * 2);
+    const int maxH = qMax(1, answerBtn->height() - padding * 2);
 
-    QFont font = btnLabel->font();
-    const int minPt = 7;
-    const int initialPt = font.pointSize() > 0 ? font.pointSize() : 18;
+    const int initialPt = qBound(
+        13, qRound(qMin(maxW, maxH) * 0.13), 24);
 
-    for (int pt = initialPt; pt >= minPt; --pt) {
+    QFont font("Arial", initialPt, QFont::DemiBold);
+    for (int pt = initialPt; pt >= 10; --pt) {
         font.setPointSize(pt);
         const QFontMetrics metrics(font);
         const QRect bounds = metrics.boundingRect(
@@ -31,7 +33,7 @@ void Answer::fitLabelText()
         }
     }
 
-    font.setPointSize(minPt);
+    font.setPointSize(10);
     btnLabel->setFont(font);
 }
 
@@ -43,49 +45,33 @@ Answer::Answer(QWidget *parent, int num, const QString &front, const QString &ba
       flipText(back)
 {
     setObjectName("answerTile");
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(8);
+    layout->setSpacing(6);
 
     answerBtn = new QToolButton(this);
     answerBtn->setObjectName("answerButton");
-    answerBtn->setFixedSize(160, 160);
+    answerBtn->setMinimumSize(140, 108);
+    answerBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     answerBtn->setToolButtonStyle(Qt::ToolButtonTextOnly);
     answerBtn->setCursor(Qt::PointingHandCursor);
-    answerBtn->setStyleSheet(R"(
-        QToolButton#answerButton {
-            color: #173b3b;
-            background: #ffffff;
-            border: 2px solid #dce8c9;
-            border-radius: 24px;
-            padding: 10px;
-            font-size: 18px;
-            font-weight: 800;
-        }
-        QToolButton#answerButton:hover {
-            background: #e8fff4;
-            border: 3px solid #06d6a0;
-        }
-        QToolButton#answerButton:disabled {
-            opacity: 1;
-        }
-    )");
+    answerBtn->installEventFilter(this);
+    applyDefaultStyle();
 
     btnLabel = new QLabel(frontText, answerBtn);
     btnLabel->setWordWrap(true);
     btnLabel->setAlignment(Qt::AlignCenter);
     btnLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
-    btnLabel->setGeometry(answerBtn->rect().adjusted(12, 12, -12, -12));
-    btnLabel->setStyleSheet("color: #173b3b; background: transparent; font-weight: 700;");
-    fitLabelText();
+    btnLabel->setStyleSheet(
+        "color: #173b3b; background: transparent; font-weight: 700;");
 
-    questionNumber = new QLabel(QString("OPTION %1").arg(num), this);
+    questionNumber = new QLabel(QString("ВАРИАНТ %1").arg(num), this);
     questionNumber->setWordWrap(true);
     questionNumber->setAlignment(Qt::AlignCenter);
     questionNumber->setStyleSheet(
-        "color: #527071; font-size: 10px; font-weight: 800; letter-spacing: 1px;");
+        "color: #415d5e; font-size: 12px; font-weight: 800;");
 
     connect(answerBtn, &QToolButton::clicked, this, [this] {
         if (!answered) {
@@ -96,8 +82,49 @@ Answer::Answer(QWidget *parent, int num, const QString &front, const QString &ba
         }
     });
 
-    layout->addWidget(answerBtn, 0, Qt::AlignHCenter);
+    layout->addWidget(answerBtn, 1);
     layout->addWidget(questionNumber);
+}
+
+bool Answer::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == answerBtn && event->type() == QEvent::Resize) {
+        updateAnswerLabelGeometry();
+        fitLabelText();
+    }
+    return QWidget::eventFilter(watched, event);
+}
+
+void Answer::updateAnswerLabelGeometry()
+{
+    if (!btnLabel || !answerBtn)
+        return;
+
+    const int padding = qMax(12, answerBtn->width() / 14);
+    btnLabel->setGeometry(
+        answerBtn->rect().adjusted(padding, padding, -padding, -padding));
+}
+
+void Answer::applyDefaultStyle()
+{
+    answerBtn->setStyleSheet(R"(
+        QToolButton#answerButton {
+            color: #173b3b;
+            background: #ffffff;
+            border: 2px solid #cbdad0;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        QToolButton#answerButton:hover {
+            background: #effcf5;
+            border: 2px solid #1b9aaa;
+        }
+        QToolButton#answerButton:disabled {
+            color: #173b3b;
+        }
+    )");
 }
 
 void Answer::flip()
@@ -106,19 +133,17 @@ void Answer::flip()
     fitLabelText();
 
     const QString background = correct ? "#06d6a0" : "#ef476f";
-    const QString foreground = "#173b3b";
-
     answerBtn->setStyleSheet(QString(R"(
         QToolButton#answerButton {
-            color: %1;
-            background: %2;
-            border: 3px solid %2;
-            border-radius: 24px;
+            color: #173b3b;
+            background: %1;
+            border: 2px solid %1;
+            border-radius: 12px;
             padding: 10px;
             font-size: 18px;
             font-weight: 800;
         }
-    )").arg(foreground, background));
+    )").arg(background));
     btnLabel->setStyleSheet(
         "color: #173b3b; background: transparent; font-weight: 800;");
 }
@@ -130,24 +155,11 @@ void Answer::setNewAnswer(const QString &front, const QString &back)
     answered = false;
     correct = false;
 
-    btnLabel->setText(front);
-    fitLabelText();
+    btnLabel->setText(frontText);
     answerBtn->setEnabled(true);
-    answerBtn->setStyleSheet(R"(
-        QToolButton#answerButton {
-            color: #173b3b;
-            background: #ffffff;
-            border: 2px solid #dce8c9;
-            border-radius: 24px;
-            padding: 10px;
-            font-size: 18px;
-            font-weight: 800;
-        }
-        QToolButton#answerButton:hover {
-            background: #e8fff4;
-            border: 3px solid #06d6a0;
-        }
-    )");
+    applyDefaultStyle();
+    updateAnswerLabelGeometry();
+    fitLabelText();
     btnLabel->setStyleSheet(
         "color: #173b3b; background: transparent; font-weight: 700;");
 }
