@@ -71,9 +71,9 @@ StartPage::StartPage(QWidget *parent)
     layout->addSpacing(12);
 
     auto *grid = new QGridLayout;
-    grid->setContentsMargins(0, 0, 0, 0);
-    grid->setHorizontalSpacing(14);
-    grid->setVerticalSpacing(14);
+    grid->setContentsMargins(14, 12, 14, 12);
+    grid->setHorizontalSpacing(22);
+    grid->setVerticalSpacing(20);
 
     for (int i = 1; i <= 5; ++i) {
         auto *quizBtn = new QPushButton(
@@ -94,7 +94,7 @@ StartPage::StartPage(QWidget *parent)
         // Three cards in the first row; the remaining two are centered.
         const int row = (i <= 3) ? 0 : 1;
         const int column = (i <= 3) ? (i - 1) * 2 : 1 + (i - 4) * 2;
-        grid->addWidget(quizBtn, row, column, 1, 2);
+        grid->addWidget(quizBtn, row, column, 1, 2, Qt::AlignCenter);
     }
 
     for (int column = 0; column < 6; ++column)
@@ -120,6 +120,13 @@ void StartPage::resizeEvent(QResizeEvent *event)
     subtitle->setFont(QFont("Arial", qBound(15, width() / 65, 22)));
 
     const int cardSize = qBound(18, width() / 44, 30);
-    for (auto *button : quizButtons)
+    const int cardWidth = qMax(
+        176, qMin(500, (width() - 2 * margin - 70) / 3));
+    const int cardHeight = qMax(
+        132, qMin(230, (height() - 210) / 2));
+
+    for (auto *button : quizButtons) {
         button->setFont(QFont("Arial", cardSize, QFont::Bold));
+        button->setMaximumSize(cardWidth, cardHeight);
+    }
 }
