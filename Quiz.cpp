@@ -12,9 +12,9 @@ Quiz::Quiz(QWidget *parent)
 
 void Quiz::setupUI()
 {
-    resize(960, 760);
-    setMinimumSize(780, 650);
-    setWindowTitle("Quiz Galaxy");
+    resize(1024, 768);
+    setMinimumSize(680, 580);
+    setWindowTitle("Охрана труда — проверка знаний");
 
     auto *central = new QWidget(this);
     central->setStyleSheet("background: #f8ffe5;");
