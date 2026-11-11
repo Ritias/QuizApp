@@ -28,6 +28,7 @@ private:
     QProgressBar *progressBar;
     QList<Answer*> answers;
     QPushButton *nextBtn;
+    QWidget *actionArea;
 
     QMediaPlayer *goodPlayer = nullptr;
     QAudioOutput *goodOut = nullptr;
