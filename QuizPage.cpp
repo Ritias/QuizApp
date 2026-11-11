@@ -30,7 +30,6 @@ QuizPage::QuizPage(QWidget *parent)
         }
         QLabel#progressLabel {
             color: #415d5e;
-            font-size: 14px;
             font-weight: 700;
         }
         QProgressBar {
@@ -59,7 +58,6 @@ QuizPage::QuizPage(QWidget *parent)
             border: 1px solid #d9a51f;
             border-radius: 10px;
             padding: 14px 30px;
-            font-size: 16px;
             font-weight: 800;
             min-height: 26px;
         }
