@@ -1,4 +1,5 @@
 #include "EndPage.h"
+#include <QtMath>
 #include "StarWarsCrawl.h"
 
 #include <QFrame>
