@@ -127,6 +127,8 @@ void StartPage::resizeEvent(QResizeEvent *event)
 
     for (auto *button : quizButtons) {
         button->setFont(QFont("Arial", cardSize, QFont::Bold));
+        button->setMinimumSize(qMax(150, cardWidth * 9 / 10),
+                               qMax(118, cardHeight * 9 / 10));
         button->setMaximumSize(cardWidth, cardHeight);
     }
 }
