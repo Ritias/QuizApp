@@ -131,7 +131,7 @@ QRectF StarWarsCrawl::crawlViewport() const
     qreal viewportW = availableW;
     qreal viewportH = viewportW * 9.0 / 16.0;
 
-    // Fit inside the widget while preserving the 4:3 ratio.
+    // Fit inside the widget while preserving the 16:9 ratio.
     if (viewportH > availableH) {
         viewportH = availableH;
         viewportW = viewportH * 16.0 / 9.0;
