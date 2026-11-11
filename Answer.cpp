@@ -18,7 +18,7 @@ void Answer::fitLabelText()
     const int maxH = qMax(1, answerBtn->height() - padding * 2);
 
     const int initialPt = qBound(
-        14, qRound(qMin(maxW, maxH) * 0.14), 36);
+        14, qRound(qMin(maxW, maxH) * 0.14), 40);
 
     QFont font("Arial", initialPt, QFont::DemiBold);
     for (int pt = initialPt; pt >= 10; --pt) {
