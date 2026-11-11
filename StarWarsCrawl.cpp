@@ -8,6 +8,7 @@
 #include <QPalette>
 #include <QResizeEvent>
 #include <QShowEvent>
+#include <QSizePolicy>
 
 #include <algorithm>
 #include <cmath>
@@ -19,7 +20,8 @@
 StarWarsCrawl::StarWarsCrawl(QWidget *parent)
     : QWidget(parent)
 {
-    setMinimumSize(300, 400);
+    setMinimumSize(320, 180);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     setAttribute(Qt::WA_OpaquePaintEvent);
     setAutoFillBackground(false);
@@ -59,19 +61,18 @@ StarWarsCrawl::StarWarsCrawl(QWidget *parent)
             </p>
 
             <p>
-                A long time ago, in a codebase far, far away...
+                Давным-давно, на одном далёком производстве...
             </p>
 
             <p>
-                Five challenging questions stand between our heroes
-                and victory. Their C++ knowledge will be tested,
-                their JSON will be parsed, and their build systems
-                will be pushed to the limit.
+                Пять вопросов помогут проверить знания требований охраны труда.
+                Внимательность, ответственность и понимание правил безопасности
+                важны на каждом рабочем месте.
             </p>
 
             <p>
-                As the final seconds approach, the team must uncover
-                the hidden bug and restore balance to the galaxy.
+                Пусть полученные знания помогают замечать опасности заранее,
+                выбирать безопасные действия и беречь себя и коллег.
             </p>
         </body>
     )");
@@ -115,7 +116,7 @@ StarWarsCrawl::StarWarsCrawl(QWidget *parent)
 
 
 // ------------------------------------------------------------
-// 3:4 portrait viewport
+// 16:9 landscape viewport
 // ------------------------------------------------------------
 
 QRectF StarWarsCrawl::crawlViewport() const
@@ -126,14 +127,14 @@ QRectF StarWarsCrawl::crawlViewport() const
     if (availableW <= 0.0 || availableH <= 0.0)
         return QRectF();
 
-    // 4:3 landscape: width = 4, height = 3.
+    // Wide 16:9 landscape viewport.
     qreal viewportW = availableW;
-    qreal viewportH = viewportW * 3.0 / 4.0;
+    qreal viewportH = viewportW * 9.0 / 16.0;
 
     // Fit inside the widget while preserving the 4:3 ratio.
     if (viewportH > availableH) {
         viewportH = availableH;
-        viewportW = viewportH * 4.0 / 3.0;
+        viewportW = viewportH * 16.0 / 9.0;
     }
 
     // Center the viewport.
