@@ -174,7 +174,7 @@ void QuizPage::resizeEvent(QResizeEvent *event)
         34);
     questionLabel->setFont(QFont("Arial", questionSize, QFont::Bold));
 
-    const int headerSize = qBound(12, width() / 75, 16);
+    const int headerSize = qBound(13, width() / 72, 18);\n    nextBtn->setFont(QFont("Arial", qBound(15, width() / 64, 21), QFont::Bold));\n    nextBtn->setMinimumHeight(qBound(48, height() / 12, 68));
     progressLabel->setFont(QFont("Arial", headerSize, QFont::DemiBold));
 }
 
