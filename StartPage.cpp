@@ -1,4 +1,5 @@
 #include "StartPage.h"
+#include <QtMath>
 
 #include <QGridLayout>
 #include <QLabel>
