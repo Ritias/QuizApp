@@ -1,7 +1,6 @@
 #include "QuizPage.h"
 
 #include <QCoreApplication>
-#include <QDir>
 #include <QFile>
 #include <QFrame>
 #include <QGridLayout>
@@ -9,7 +8,10 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QResizeEvent>
+#include <QSizePolicy>
 #include <QVBoxLayout>
+#include <QFont>
 
 QuizPage::QuizPage(QWidget *parent)
     : QWidget(parent)
@@ -22,63 +24,62 @@ QuizPage::QuizPage(QWidget *parent)
         }
         QLabel#eyebrow {
             color: #1b9aaa;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 800;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
         QLabel#progressLabel {
-            color: #527071;
-            font-size: 13px;
+            color: #415d5e;
+            font-size: 14px;
             font-weight: 700;
         }
         QProgressBar {
-            background: #e3edcf;
+            background: #e2ebdc;
             border: none;
-            border-radius: 5px;
-            height: 9px;
+            border-radius: 6px;
+            height: 12px;
             text-align: center;
         }
         QProgressBar::chunk {
             background: #06d6a0;
-            border-radius: 5px;
+            border-radius: 6px;
         }
         QFrame#questionCard {
             background: #ffffff;
-            border: 2px solid #e3edcf;
-            border-radius: 22px;
+            border: 2px solid #d5e2d7;
+            border-radius: 12px;
         }
         QLabel#questionLabel {
             color: #173b3b;
-            font-size: 23px;
             font-weight: 800;
         }
         QPushButton#nextButton {
             color: #173b3b;
             background: #ffc43d;
-            border: none;
-            border-radius: 16px;
-            padding: 13px 34px;
-            font-size: 15px;
+            border: 1px solid #d9a51f;
+            border-radius: 10px;
+            padding: 14px 30px;
+            font-size: 16px;
             font-weight: 800;
+            min-height: 26px;
         }
         QPushButton#nextButton:hover {
-            background: #ffd36b;
+            background: #ffcf60;
         }
         QPushButton#nextButton:pressed {
-            padding-top: 15px;
-            padding-bottom: 11px;
+            background: #f3b92d;
         }
     )");
 
     auto *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(38, 28, 38, 30);
-    layout->setSpacing(14);
+    layout->setContentsMargins(34, 24, 34, 24);
+    layout->setSpacing(12);
 
     auto *topRow = new QHBoxLayout;
-    auto *eyebrow = new QLabel("QUIZ GALAXY  /  CHALLENGE", this);
+    auto *eyebrow = new QLabel("ОХРАНА ТРУДА  /  ПРОВЕРКА ЗНАНИЙ", this);
     eyebrow->setObjectName("eyebrow");
 
-    progressLabel = new QLabel("ВОПРОС 1", this);
+    progressLabel = new QLabel("ВОПРОС 1 ИЗ 5", this);
     progressLabel->setObjectName("progressLabel");
     topRow->addWidget(eyebrow);
     topRow->addStretch();
@@ -92,7 +93,7 @@ QuizPage::QuizPage(QWidget *parent)
     auto *questionCard = new QFrame(this);
     questionCard->setObjectName("questionCard");
     auto *questionLayout = new QVBoxLayout(questionCard);
-    questionLayout->setContentsMargins(24, 18, 24, 18);
+    questionLayout->setContentsMargins(24, 16, 24, 16);
 
     questionLabel = new QLabel(questionCard);
     questionLabel->setObjectName("questionLabel");
@@ -100,24 +101,32 @@ QuizPage::QuizPage(QWidget *parent)
     questionLabel->setAlignment(Qt::AlignCenter);
     questionLayout->addWidget(questionLabel);
 
-    auto *ansLayout = new QGridLayout;
-    ansLayout->setHorizontalSpacing(18);
-    ansLayout->setVerticalSpacing(12);
+    auto *answerGrid = new QGridLayout;
+    answerGrid->setContentsMargins(0, 0, 0, 0);
+    answerGrid->setHorizontalSpacing(14);
+    answerGrid->setVerticalSpacing(12);
     answers = QList<Answer*>();
 
     for (int i = 0; i < 5; ++i) {
         auto *answer = new Answer(this, i + 1);
+        answer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         answers.append(answer);
-
-        const int row = i / 3;
-        const int column = i % 3;
-        ansLayout->addWidget(answer, row, column, Qt::AlignCenter);
     }
 
-    for (int column = 0; column < 3; ++column)
-        ansLayout->setColumnStretch(column, 1);
+    // Six equal columns keep every card the same width. The two lower
+    // cards occupy the middle four columns and are therefore centered.
+    answerGrid->addWidget(answers[0], 0, 0, 1, 2);
+    answerGrid->addWidget(answers[1], 0, 2, 1, 2);
+    answerGrid->addWidget(answers[2], 0, 4, 1, 2);
+    answerGrid->addWidget(answers[3], 1, 1, 1, 2);
+    answerGrid->addWidget(answers[4], 1, 3, 1, 2);
 
-    nextBtn = new QPushButton("ДАЛЬШЕ  →", this);
+    for (int column = 0; column < 6; ++column)
+        answerGrid->setColumnStretch(column, 1);
+    answerGrid->setRowStretch(0, 1);
+    answerGrid->setRowStretch(1, 1);
+
+    nextBtn = new QPushButton("СЛЕДУЮЩИЙ ВОПРОС  →", this);
     nextBtn->setObjectName("nextButton");
     nextBtn->setCursor(Qt::PointingHandCursor);
     nextBtn->hide();
@@ -125,7 +134,7 @@ QuizPage::QuizPage(QWidget *parent)
     layout->addLayout(topRow);
     layout->addWidget(progressBar);
     layout->addWidget(questionCard);
-    layout->addLayout(ansLayout, 1);
+    layout->addLayout(answerGrid, 1);
     layout->addWidget(nextBtn, 0, Qt::AlignRight);
 
     for (int i = 0; i < 5; i++) {
@@ -150,12 +159,31 @@ QuizPage::QuizPage(QWidget *parent)
     });
 }
 
+void QuizPage::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+
+    const int margin = qBound(18, width() / 30, 40);
+    if (layout())
+        layout()->setContentsMargins(margin, qBound(14, height() / 30, 26),
+                                     margin, qBound(14, height() / 30, 26));
+
+    const int questionSize = qBound(
+        16,
+        qRound(24.0 * qMin(width() / 960.0, height() / 760.0)),
+        34);
+    questionLabel->setFont(QFont("Arial", questionSize, QFont::Bold));
+
+    const int headerSize = qBound(12, width() / 75, 16);
+    progressLabel->setFont(QFont("Arial", headerSize, QFont::DemiBold));
+}
+
 void QuizPage::loadFromJson(const QString &jsonFilePath)
 {
     QFile file(jsonFilePath);
     if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "Couldn't open quiz file";
-        qWarning() << "Reason: " << file.errorString();
+        qWarning() << "Не удалось открыть файл теста";
+        qWarning() << "Причина:" << file.errorString();
         return;
     }
 
@@ -170,8 +198,8 @@ void QuizPage::loadFromJson(const QString &jsonFilePath)
 void QuizPage::loadQuestion(int ind)
 {
     if (ind < 0 || ind >= questions.size()) {
-        qWarning() << "loadQuestion: bad index" << ind
-                   << "size =" << questions.size();
+        qWarning() << "Некорректный номер вопроса:" << ind
+                   << "Количество вопросов:" << questions.size();
         return;
     }
 
@@ -179,7 +207,7 @@ void QuizPage::loadQuestion(int ind)
     questionLabel->setText(current.value("question").toString());
 
     progressLabel->setText(
-        QString("ВОПРОС %1 / %2").arg(ind + 1).arg(questions.size()));
+        QString("ВОПРОС %1 ИЗ %2").arg(ind + 1).arg(questions.size()));
     progressBar->setValue(
         qRound(100.0 * (ind + 1) / questions.size()));
 
@@ -241,12 +269,12 @@ void QuizPage::loadQuiz(const QString &filename)
 
     const QString path =
         QCoreApplication::applicationDirPath() + "/assets/" + filename;
-    qDebug() << "Loading quiz file:" << path;
+    qDebug() << "Загрузка теста:" << path;
 
     loadFromJson(path);
     if (questions.isEmpty()) {
-        questionLabel->setText(tr("Файл пуст или не найден: %1").arg(filename));
-        progressLabel->setText("НЕТ ВОПРОСОВ");
+        questionLabel->setText(tr("Файл теста пуст или не найден: %1").arg(filename));
+        progressLabel->setText("ВОПРОСОВ НЕТ");
         progressBar->setValue(0);
         return;
     }
