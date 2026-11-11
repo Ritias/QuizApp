@@ -4,6 +4,8 @@
 #include <QFrame>
 #include <QLabel>
 #include <QPushButton>
+#include <QResizeEvent>
+#include <QFont>
 #include <QSizePolicy>
 #include <QVBoxLayout>
 
@@ -48,15 +50,15 @@ EndPage::EndPage(QWidget *parent)
     layout->setContentsMargins(32, 20, 32, 20);
     layout->setSpacing(10);
 
-    auto *title = new QLabel("ТЕСТИРОВАНИЕ ЗАВЕРШЕНО", this);
-    title->setObjectName("endTitle");
-    title->setAlignment(Qt::AlignCenter);
+    titleLabel = new QLabel("ТЕСТИРОВАНИЕ ЗАВЕРШЕНО", this);
+    titleLabel->setObjectName("endTitle");
+    titleLabel->setAlignment(Qt::AlignCenter);
 
-    auto *subtitle = new QLabel(
+    subtitleLabel = new QLabel(
         "Спасибо за прохождение проверки знаний по охране труда.", this);
-    subtitle->setObjectName("endSubtitle");
-    subtitle->setAlignment(Qt::AlignCenter);
-    subtitle->setWordWrap(true);
+    subtitleLabel->setObjectName("endSubtitle");
+    subtitleLabel->setAlignment(Qt::AlignCenter);
+    subtitleLabel->setWordWrap(true);
 
     auto *crawlFrame = new QFrame(this);
     crawlFrame->setObjectName("crawlFrame");
@@ -69,16 +71,27 @@ EndPage::EndPage(QWidget *parent)
     swc->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     crawlLayout->addWidget(swc);
 
-    auto *menu = new QPushButton("←  ВЕРНУТЬСЯ К ВЫБОРУ ТЕСТА", this);
-    menu->setObjectName("menuButton");
-    menu->setCursor(Qt::PointingHandCursor);
-    connect(menu, &QPushButton::clicked, this, [this] {
+    menuButton = new QPushButton("←  ВЕРНУТЬСЯ К ВЫБОРУ ТЕСТА", this);
+    menuButton->setObjectName("menuButton");
+    menuButton->setCursor(Qt::PointingHandCursor);
+    connect(menuButton, &QPushButton::clicked, this, [this] {
         emit goToStart();
     });
 
-    layout->addWidget(title);
-    layout->addWidget(subtitle);
+    layout->addWidget(titleLabel);
+    layout->addWidget(subtitleLabel);
     // Do not center the frame at its size hint: let it fill the wide page.
     layout->addWidget(crawlFrame, 1);
-    layout->addWidget(menu, 0, Qt::AlignHCenter);
+    layout->addWidget(menuButton, 0, Qt::AlignHCenter);
+}
+
+void EndPage::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+
+    const qreal scale = qMin(width() / 1024.0, height() / 768.0);
+    titleLabel->setFont(QFont("Arial", qBound(20, qRound(30 * scale), 38), QFont::Bold));
+    subtitleLabel->setFont(QFont("Arial", qBound(14, qRound(16 * scale), 22)));
+    menuButton->setFont(QFont("Arial", qBound(15, qRound(17 * scale), 22), QFont::Bold));
+    menuButton->setMinimumHeight(qBound(48, height() / 12, 68));
 }
