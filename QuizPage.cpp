@@ -101,9 +101,9 @@ QuizPage::QuizPage(QWidget *parent)
     questionLayout->addWidget(questionLabel);
 
     auto *answerGrid = new QGridLayout;
-    answerGrid->setContentsMargins(0, 0, 0, 0);
-    answerGrid->setHorizontalSpacing(14);
-    answerGrid->setVerticalSpacing(12);
+    answerGrid->setContentsMargins(12, 8, 12, 8);
+    answerGrid->setHorizontalSpacing(20);
+    answerGrid->setVerticalSpacing(18);
     answers = QList<Answer*>();
 
     for (int i = 0; i < 5; ++i) {
@@ -125,16 +125,25 @@ QuizPage::QuizPage(QWidget *parent)
     answerGrid->setRowStretch(0, 1);
     answerGrid->setRowStretch(1, 1);
 
-    nextBtn = new QPushButton("СЛЕДУЮЩИЙ ВОПРОС  →", this);
+    actionArea = new QWidget(this);
+    actionArea->setObjectName("actionArea");
+    actionArea->setFixedHeight(68);
+    auto *actionLayout = new QHBoxLayout(actionArea);
+    actionLayout->setContentsMargins(0, 0, 0, 0);
+    actionLayout->addStretch();
+
+    nextBtn = new QPushButton("СЛЕДУЮЩИЙ ВОПРОС  →", actionArea);
     nextBtn->setObjectName("nextButton");
     nextBtn->setCursor(Qt::PointingHandCursor);
+    nextBtn->setMinimumWidth(210);
     nextBtn->hide();
+    actionLayout->addWidget(nextBtn, 0, Qt::AlignRight | Qt::AlignVCenter);
 
     layout->addLayout(topRow);
     layout->addWidget(progressBar);
     layout->addWidget(questionCard);
     layout->addLayout(answerGrid, 1);
-    layout->addWidget(nextBtn, 0, Qt::AlignRight);
+    layout->addWidget(actionArea);
 
     for (int i = 0; i < 5; i++) {
         connect(answers[i], &Answer::giveAns, this, [this](bool correct) {
@@ -176,7 +185,9 @@ void QuizPage::resizeEvent(QResizeEvent *event)
     const int headerSize = qBound(13, width() / 72, 18);
     progressLabel->setFont(QFont("Arial", headerSize, QFont::DemiBold));
     nextBtn->setFont(QFont("Arial", qBound(15, width() / 64, 21), QFont::Bold));
-    nextBtn->setMinimumHeight(qBound(48, height() / 12, 68));
+    nextBtn->setMinimumHeight(qBound(46, height() / 14, 60));
+    nextBtn->setMinimumWidth(qBound(210, width() / 4, 320));
+    actionArea->setFixedHeight(qBound(62, height() / 10, 82));
 }
 
 void QuizPage::loadFromJson(const QString &jsonFilePath)
