@@ -34,12 +34,12 @@ StarWarsCrawl::StarWarsCrawl(QWidget *parent)
 
     document_.setDefaultStyleSheet(R"(
         body {
-            color: #FFE81F;
+            color: #ffc43d;
             background: transparent;
         }
 
         p {
-            color: #FFE81F;
+            color: #ffc43d;
             margin-top: 0px;
             margin-bottom: 18px;
             padding: 0px;
@@ -262,7 +262,7 @@ void StarWarsCrawl::renderTextImage()
 
     context.palette.setColor(
         QPalette::Text,
-        QColor("#FFE81F")
+        QColor("#ffc43d")
         );
 
     document_.documentLayout()->draw(&painter, context);
