@@ -6,6 +6,7 @@
 #include <QWidget>
 
 class QEvent;
+class QResizeEvent;
 
 class Answer : public QWidget
 {
@@ -22,6 +23,7 @@ public:
     void fitLabelText();
 
 protected:
+    void resizeEvent(QResizeEvent *event) override;
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
