@@ -1,4 +1,5 @@
 #pragma once
+
 #include <QLabel>
 #include <QWidget>
 #include <QPushButton>
@@ -7,13 +8,20 @@
 #include <QJsonObject>
 #include <QtMultimedia>
 
+class QResizeEvent;
+
 class QuizPage : public QWidget {
     Q_OBJECT
 public:
     explicit QuizPage(QWidget *parent = nullptr);
     void loadQuiz(const QString &file);
+
 signals:
     void goToEnd();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
 private:
     QLabel *questionLabel;
     QLabel *progressLabel;
