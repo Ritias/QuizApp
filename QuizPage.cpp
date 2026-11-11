@@ -1,4 +1,5 @@
 #include "QuizPage.h"
+#include <QtMath>
 
 #include <QCoreApplication>
 #include <QFile>
