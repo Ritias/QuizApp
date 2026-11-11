@@ -84,7 +84,7 @@ Answer::Answer(QWidget *parent, int num, const QString &front, const QString &ba
         }
     });
 
-    layout->addWidget(answerBtn, 1, Qt::AlignCenter);
+    layout->addWidget(answerBtn, 1);
     layout->addWidget(questionNumber);
 }
 
