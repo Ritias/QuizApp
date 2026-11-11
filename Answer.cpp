@@ -2,6 +2,7 @@
 #include <QtMath>
 
 #include <QEvent>
+#include <QResizeEvent>
 #include <QFontMetrics>
 #include <QHBoxLayout>
 #include <QSizePolicy>
@@ -49,7 +50,7 @@ Answer::Answer(QWidget *parent, int num, const QString &front, const QString &ba
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(12, 10, 12, 10);
     layout->setSpacing(6);
 
     answerBtn = new QToolButton(this);
@@ -83,8 +84,22 @@ Answer::Answer(QWidget *parent, int num, const QString &front, const QString &ba
         }
     });
 
-    layout->addWidget(answerBtn, 1);
+    layout->addWidget(answerBtn, 1, Qt::AlignCenter);
     layout->addWidget(questionNumber);
+}
+
+void Answer::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+
+    // Keep a modest border of breathing room inside each grid cell.
+    // The cap prevents tiles from becoming oversized on wide displays.
+    const int buttonWidth = qBound(140, width() - 40, 440);
+    const int buttonHeight = qBound(108, height() - 48, 250);
+    answerBtn->setMaximumSize(buttonWidth, buttonHeight);
+
+    updateAnswerLabelGeometry();
+    fitLabelText();
 }
 
 bool Answer::eventFilter(QObject *watched, QEvent *event)
