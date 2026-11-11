@@ -1,8 +1,11 @@
 #pragma once
+
 #include <QToolButton>
 #include <QLabel>
 #include <QString>
 #include <QWidget>
+
+class QEvent;
 
 class Answer : public QWidget
 {
@@ -18,6 +21,9 @@ public:
     void setCorrect(bool isCorrect);
     void fitLabelText();
 
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private:
     QToolButton *answerBtn;
     QLabel *btnLabel;
@@ -28,7 +34,9 @@ private:
     bool answered = false;
 
     void flip();
+    void updateAnswerLabelGeometry();
+    void applyDefaultStyle();
 
-    signals:
+signals:
     void giveAns(bool correctly);
 };
