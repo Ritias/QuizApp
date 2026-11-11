@@ -178,7 +178,6 @@ void QuizPage::resizeEvent(QResizeEvent *event)
     progressLabel->setFont(QFont("Arial", headerSize, QFont::DemiBold));
     nextBtn->setFont(QFont("Arial", qBound(15, width() / 64, 21), QFont::Bold));
     nextBtn->setMinimumHeight(qBound(48, height() / 12, 68));
-    progressLabel->setFont(QFont("Arial", headerSize, QFont::DemiBold));
 }
 
 void QuizPage::loadFromJson(const QString &jsonFilePath)
