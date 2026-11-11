@@ -121,7 +121,7 @@ void StartPage::resizeEvent(QResizeEvent *event)
 
     const int cardSize = qBound(18, width() / 44, 30);
     const int cardWidth = qMax(
-        176, qMin(500, (width() - 2 * margin - 70) / 3));
+        176, qMin(500, (width() - 2 * margin - 70) / 3 - 14));
     const int cardHeight = qMax(
         132, qMin(230, (height() - 210) / 2));
 
