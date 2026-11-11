@@ -1,15 +1,24 @@
 #pragma once
-#include <QObject>
+
 #include <QWidget>
 #include <QLabel>
-#include<QPushButton>
+
+class QPushButton;
+class QResizeEvent;
 
 class EndPage : public QWidget {
     Q_OBJECT
 public:
     explicit EndPage(QWidget *parent = nullptr);
-private:
-    QLabel *label;
+
 signals:
     void goToStart();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
+private:
+    QLabel *titleLabel;
+    QLabel *subtitleLabel;
+    QPushButton *menuButton;
 };
