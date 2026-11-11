@@ -1,10 +1,12 @@
 #include "StartPage.h"
 
-#include <QFont>
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QResizeEvent>
+#include <QSizePolicy>
 #include <QVBoxLayout>
+#include <QFont>
 
 StartPage::StartPage(QWidget *parent)
     : QWidget(parent)
@@ -16,92 +18,107 @@ StartPage::StartPage(QWidget *parent)
         }
         QLabel#eyebrow {
             color: #1b9aaa;
-            font-size: 12px;
             font-weight: 800;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
         QLabel#pageTitle {
             color: #173b3b;
-            font-size: 34px;
-            font-weight: 900;
+            font-weight: 800;
         }
         QLabel#pageSubtitle {
-            color: #527071;
-            font-size: 15px;
+            color: #415d5e;
         }
         QPushButton#quizCard {
             color: #173b3b;
             text-align: left;
             padding: 22px;
-            border: none;
-            border-radius: 22px;
-            font-size: 19px;
+            background: #ffffff;
+            border: 2px solid #d5e2d7;
+            border-radius: 12px;
             font-weight: 800;
+            min-height: 118px;
         }
         QPushButton#quizCard:hover {
-            border: 3px solid #173b3b;
+            background: #effcf5;
+            border: 2px solid #1b9aaa;
         }
         QPushButton#quizCard:pressed {
-            padding-top: 25px;
-            padding-left: 25px;
+            background: #dff8ed;
         }
     )");
 
     auto *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(48, 42, 48, 42);
-    layout->setSpacing(14);
+    layout->setContentsMargins(36, 30, 36, 30);
+    layout->setSpacing(12);
 
-    auto *eyebrow = new QLabel("QUIZ GALAXY  /  KNOWLEDGE ARCADE", this);
+    eyebrow = new QLabel("ОХРАНА ТРУДА  /  ПРОВЕРКА ЗНАНИЙ", this);
     eyebrow->setObjectName("eyebrow");
 
-    label = new QLabel("ВЫБЕРИ СВОЙ КВИЗ", this);
+    label = new QLabel("БЕЗОПАСНОСТЬ НА ПРОИЗВОДСТВЕ", this);
     label->setObjectName("pageTitle");
+    label->setWordWrap(true);
 
-    auto *subtitle = new QLabel(
-        "Пять вариантов. Новые открытия. Твой выход на орбиту знаний.",
+    subtitle = new QLabel(
+        "Выберите тест по охране труда и проверьте свои знания.",
         this);
     subtitle->setObjectName("pageSubtitle");
+    subtitle->setWordWrap(true);
 
     layout->addWidget(eyebrow);
     layout->addWidget(label);
     layout->addWidget(subtitle);
-    layout->addSpacing(18);
+    layout->addSpacing(12);
 
     auto *grid = new QGridLayout;
-    grid->setHorizontalSpacing(18);
-    grid->setVerticalSpacing(18);
-
-    const QStringList cardColors = {
-        "#06d6a0", "#ffc43d", "#1b9aaa", "#ef476f", "#06d6a0"
-    };
+    grid->setContentsMargins(0, 0, 0, 0);
+    grid->setHorizontalSpacing(14);
+    grid->setVerticalSpacing(14);
 
     for (int i = 1; i <= 5; ++i) {
         auto *quizBtn = new QPushButton(
-            QString("КВИЗ  %1\nНачать приключение  →").arg(i, 2, 10, QChar('0')),
+            QString("ТЕСТ № %1\nНачать проверку  →")
+                .arg(i, 2, 10, QChar('0')),
             this);
         quizBtn->setObjectName("quizCard");
-        quizBtn->setMinimumSize(205, 118);
+        quizBtn->setMinimumSize(150, 118);
+        quizBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         quizBtn->setCursor(Qt::PointingHandCursor);
-        quizBtn->setStyleSheet(QString(
-            "QPushButton#quizCard { background-color: %1; }"
-            "QPushButton#quizCard:hover { background-color: %2; }")
-            .arg(cardColors.at(i - 1),
-                 cardColors.at(i - 1)));
+        quizButtons.append(quizBtn);
 
         const QString filename = QString("questions_data_%1.json").arg(i);
         connect(quizBtn, &QPushButton::clicked, this, [this, filename] {
             emit goToQuiz(filename);
         });
 
-        const int row = (i - 1) / 3;
-        const int column = (i - 1) % 3;
-        grid->addWidget(quizBtn, row, column);
+        // Three cards in the first row; the remaining two are centered.
+        const int row = (i <= 3) ? 0 : 1;
+        const int column = (i <= 3) ? (i - 1) * 2 : 1 + (i - 4) * 2;
+        grid->addWidget(quizBtn, row, column, 1, 2);
     }
 
-    grid->setColumnStretch(0, 1);
-    grid->setColumnStretch(1, 1);
-    grid->setColumnStretch(2, 1);
+    for (int column = 0; column < 6; ++column)
+        grid->setColumnStretch(column, 1);
+    grid->setRowStretch(0, 1);
+    grid->setRowStretch(1, 1);
 
-    layout->addLayout(grid);
-    layout->addStretch();
+    layout->addLayout(grid, 1);
+}
+
+void StartPage::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+
+    const int margin = qBound(20, width() / 28, 48);
+    if (layout())
+        layout()->setContentsMargins(margin, qBound(18, height() / 24, 34),
+                                     margin, qBound(18, height() / 24, 34));
+
+    const int titleSize = qBound(22, width() / 35, 36);
+    label->setFont(QFont("Arial", titleSize, QFont::Bold));
+    eyebrow->setFont(QFont("Arial", qBound(12, width() / 75, 16), QFont::Bold));
+    subtitle->setFont(QFont("Arial", qBound(14, width() / 68, 19)));
+
+    const int cardSize = qBound(17, width() / 48, 25);
+    for (auto *button : quizButtons)
+        button->setFont(QFont("Arial", cardSize, QFont::Bold));
 }
