@@ -77,7 +77,7 @@ StartPage::StartPage(QWidget *parent)
 
     for (int i = 1; i <= 5; ++i) {
         auto *quizBtn = new QPushButton(
-            QString("ТЕСТ № %1\nНачать проверку  →")
+            QString("ТЕСТ № %1\nОткрыть тест  →")
                 .arg(i, 2, 10, QChar('0')),
             this);
         quizBtn->setObjectName("quizCard");
