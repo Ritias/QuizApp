@@ -219,7 +219,7 @@ qreal StarWarsCrawl::phaseForProgress() const
 
     // Let the text shrink into the horizon.
     // A larger value makes the crawl finish sooner.
-    const qreal finishDistance = 120.0;
+    const qreal finishDistance = 112.0;
 
     const qreal finishPhase =
         textImage_.height() + c / finishDistance;
