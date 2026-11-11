@@ -19,12 +19,10 @@ EndPage::EndPage(QWidget *parent)
         }
         QLabel#endTitle {
             color: #173b3b;
-            font-size: 28px;
             font-weight: 800;
         }
         QLabel#endSubtitle {
             color: #415d5e;
-            font-size: 15px;
         }
         QFrame#crawlFrame {
             background: #000000;
@@ -37,7 +35,6 @@ EndPage::EndPage(QWidget *parent)
             border: 1px solid #079f79;
             border-radius: 10px;
             padding: 14px 30px;
-            font-size: 16px;
             font-weight: 800;
             min-height: 28px;
         }
