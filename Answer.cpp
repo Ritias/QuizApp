@@ -1,4 +1,5 @@
 #include "Answer.h"
+#include <QtMath>
 
 #include <QEvent>
 #include <QFontMetrics>
