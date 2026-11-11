@@ -113,12 +113,12 @@ void StartPage::resizeEvent(QResizeEvent *event)
         layout()->setContentsMargins(margin, qBound(18, height() / 24, 34),
                                      margin, qBound(18, height() / 24, 34));
 
-    const int titleSize = qBound(22, width() / 35, 36);
+    const int titleSize = qBound(24, width() / 32, 44);
     label->setFont(QFont("Arial", titleSize, QFont::Bold));
     eyebrow->setFont(QFont("Arial", qBound(12, width() / 75, 16), QFont::Bold));
-    subtitle->setFont(QFont("Arial", qBound(14, width() / 68, 19)));
+    subtitle->setFont(QFont("Arial", qBound(15, width() / 65, 22)));
 
-    const int cardSize = qBound(17, width() / 48, 25);
+    const int cardSize = qBound(18, width() / 44, 30);
     for (auto *button : quizButtons)
         button->setFont(QFont("Arial", cardSize, QFont::Bold));
 }
