@@ -2,10 +2,10 @@
 #include <QLabel>
 #include <QWidget>
 #include <QPushButton>
+#include <QProgressBar>
 #include "Answer.h"
 #include <QJsonObject>
 #include <QtMultimedia>
-
 
 class QuizPage : public QWidget {
     Q_OBJECT
@@ -15,19 +15,19 @@ public:
 signals:
     void goToEnd();
 private:
-    QLabel * questionLabel;
+    QLabel *questionLabel;
+    QLabel *progressLabel;
+    QProgressBar *progressBar;
     QList<Answer*> answers;
-    QPushButton * nextBtn;
+    QPushButton *nextBtn;
 
     QMediaPlayer *goodPlayer = nullptr;
-    QAudioOutput *goodOut    = nullptr;
-    QMediaPlayer *badPlayer  = nullptr;
-    QAudioOutput *badOut     = nullptr;
+    QAudioOutput *goodOut = nullptr;
+    QMediaPlayer *badPlayer = nullptr;
+    QAudioOutput *badOut = nullptr;
 
     void setupSounds();
-
     void playGood();
-
     void playBad();
 
     QList<QJsonObject> questions;
