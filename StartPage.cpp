@@ -75,7 +75,7 @@ StartPage::StartPage(QWidget *parent)
     grid->setHorizontalSpacing(22);
     grid->setVerticalSpacing(20);
 
-    for (int i = 1; i <= 5; ++i) {
+    for (int i = 1; i <= 4; ++i) {
         auto *quizBtn = new QPushButton(
             QString("ТЕСТ № %1\nОткрыть тест  →")
                 .arg(i, 2, 10, QChar('0')),
@@ -87,14 +87,15 @@ StartPage::StartPage(QWidget *parent)
         quizButtons.append(quizBtn);
 
         const QString filename = QString("questions_data_%1.json").arg(i);
-        connect(quizBtn, &QPushButton::clicked, this, [this, filename] {
-            emit goToQuiz(filename);
+        connect(quizBtn, &QPushButton::clicked, this, [i, this, filename] {
+            emit goToQuiz(i, filename);
         });
 
-        // Three cards in the first row; the remaining two are centered.
-        const int row = (i <= 3) ? 0 : 1;
-        const int column = (i <= 3) ? (i - 1) * 2 : 1 + (i - 4) * 2;
-        grid->addWidget(quizBtn, row, column, 1, 2, Qt::AlignCenter);
+        // Two cards per row on a 6-column grid: each card spans 3 columns,
+        // giving an even 2x2 layout.
+        const int row    = (i - 1) / 2;          // 1,2 -> 0;  3,4 -> 1
+        const int column = ((i - 1) % 2) * 3;    // 1,3 -> 0;  2,4 -> 3
+        grid->addWidget(quizBtn, row, column, 1, 3, Qt::AlignCenter);
     }
 
     for (int column = 0; column < 6; ++column)
@@ -121,7 +122,7 @@ void StartPage::resizeEvent(QResizeEvent *event)
 
     const int cardSize = qBound(18, width() / 44, 30);
     const int cardWidth = qMax(
-        176, qMin(500, (width() - 2 * margin - 70) / 3 - 14));
+        176, qMin(500, (width() - 2 * margin - 70) / 2 - 14));
     const int cardHeight = qMax(
         132, qMin(230, (height() - 210) / 2));
 

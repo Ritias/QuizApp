@@ -2,10 +2,11 @@
 #include <QMainWindow>
 #include <QStackedWidget>
 
+#include "results.h"
 #include "EndPage.h"
 #include "StartPage.h"
 #include "QuizPage.h"
-
+#include<QDebug>
 class Quiz : public QMainWindow
 {
     Q_OBJECT
@@ -19,6 +20,7 @@ private:
     StartPage* start;
     QuizPage* quiz;
     EndPage* end;
+    Results res;
 private slots:
-    void onGoToQuiz(const QString &file);
+    void onGoToQuiz(int,const QString &file);
 };

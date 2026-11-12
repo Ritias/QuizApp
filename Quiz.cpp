@@ -45,10 +45,18 @@ void Quiz::setupConnections()
     connect(end, &EndPage::goToStart, this, [this] {
         stack->setCurrentWidget(start);
     });
+    connect(quiz, &QuizPage::WrongAnsGive,this,[this](){res.addWrong();});
+    connect(quiz,&QuizPage::quizFinish,this,[this](){
+        res.end();
+        for (const auto &r : res.getRows()) {
+            qDebug() << r.quizNumber << r.countWrong << r.timeString().toStdString().c_str();;
+        }
+    });
 }
 
-void Quiz::onGoToQuiz(const QString &file)
+void Quiz::onGoToQuiz(int num,const QString &file)
 {
     quiz->loadQuiz(file);
     stack->setCurrentWidget(quiz);
+    res.start(num);
 }

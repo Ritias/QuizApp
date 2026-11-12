@@ -1,5 +1,4 @@
 #pragma once
-
 #include <QLabel>
 #include <QWidget>
 #include <QPushButton>
@@ -18,7 +17,8 @@ public:
 
 signals:
     void goToEnd();
-
+    void WrongAnsGive();
+    void quizFinish();
 protected:
     void resizeEvent(QResizeEvent *event) override;
 

@@ -4,7 +4,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QList>
-
 class QResizeEvent;
 
 class StartPage : public QWidget {
@@ -13,7 +12,7 @@ public:
     explicit StartPage(QWidget *parent = nullptr);
 
 signals:
-    void goToQuiz(const QString &file);
+    void goToQuiz(int,const QString &file);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

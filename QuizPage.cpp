@@ -69,7 +69,6 @@ QuizPage::QuizPage(QWidget *parent)
             background: #f3b92d;
         }
     )");
-
     auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(34, 24, 34, 24);
     layout->setSpacing(12);
@@ -153,6 +152,7 @@ QuizPage::QuizPage(QWidget *parent)
                 nextBtn->show();
             } else {
                 playBad();
+                emit WrongAnsGive();
             }
         });
     }
@@ -161,6 +161,7 @@ QuizPage::QuizPage(QWidget *parent)
         nextBtn->hide();
         index++;
         if (index >= questions.size()) {
+            emit quizFinish();
             emit goToEnd();
         } else {
             loadQuestion(index);
@@ -276,7 +277,6 @@ void QuizPage::loadQuiz(const QString &filename)
     index = 0;
     nextBtn->hide();
     questionLabel->setText(QString());
-
     for (auto *answer : answers)
         answer->setNewAnswer(QString(), QString());
 
@@ -291,6 +291,5 @@ void QuizPage::loadQuiz(const QString &filename)
         progressBar->setValue(0);
         return;
     }
-
     loadQuestion(0);
 }

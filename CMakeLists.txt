@@ -33,6 +33,7 @@ add_executable(QuizApp
     Answer.cpp
     Answer.h
     StarWarsCrawl.h StarWarsCrawl.cpp
+    results.h results.cpp
     # resources.qrc          # <-- uncomment if you switch to the .qrc approach
 )
 
