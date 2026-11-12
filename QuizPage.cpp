@@ -137,6 +137,7 @@ QuizPage::QuizPage(QWidget *parent)
     nextBtn->setCursor(Qt::PointingHandCursor);
     nextBtn->setMinimumWidth(210);
     nextBtn->hide();
+    nextBtn->setFocusPolicy(Qt::NoFocus);
     actionLayout->addWidget(nextBtn, 0, Qt::AlignRight | Qt::AlignVCenter);
 
     layout->addLayout(topRow);
