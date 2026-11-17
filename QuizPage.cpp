@@ -112,12 +112,15 @@ QuizPage::QuizPage(QWidget *parent) : QWidget(parent)
         connect(answers[i], &Answer::giveAns, this, [this](bool correct) {
             if (correct) {
                 playGood();
+                currentQuestionSolved = true;
                 nextBtn->show();
             } else {
                 playBad();
-                ++wrongCount;
-                refreshStats();
-                emit WrongAnsGive();
+                if (!currentQuestionSolved) {
+                    ++wrongCount;
+                    refreshStats();
+                    emit WrongAnsGive();
+                }
             }
         });
     }
@@ -180,6 +183,7 @@ void QuizPage::loadQuestion(int ind)
         qWarning() << "Некорректный номер вопроса:" << ind << "Количество вопросов:" << questions.size();
         return;
     }
+    currentQuestionSolved = false;
     const QJsonObject current = questions.at(ind);
     questionLabel->setText(current.value("question").toString());
     progressLabel->setText(QString("ВОПРОС %1 ИЗ %2").arg(ind + 1).arg(questions.size()));
