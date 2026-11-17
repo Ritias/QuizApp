@@ -14,6 +14,9 @@ public:
     void markQuizCompleted(int quizNumber);
 
 signals:
+    void showFinalResults();
+
+signals:
     void goToQuiz(int, const QString &file);
 
 protected:
@@ -24,4 +27,7 @@ private:
     QLabel *label;
     QLabel *subtitle;
     QList<QPushButton*> quizButtons;
+    QList<int> availableQuizzes;
+    QList<int> completedQuizzes;
+    QPushButton *resultsButton = nullptr;
 };
