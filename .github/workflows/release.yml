@@ -19,8 +19,15 @@ jobs:
     runs-on: windows-2022
 
     steps:
-      - name: Checkout
+      - name: Checkout release source
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag_name }}
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: Set up CMake 4.2
         uses: jwlawson/actions-setup-cmake@v2
@@ -37,31 +44,28 @@ jobs:
           modules: qtmultimedia
 
       - name: Configure CMake
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake --build build --config Release --parallel
+        run: cmake --build build --parallel
 
-      - name: Verify executable
+      - name: Locate executable
+        id: locate
         shell: pwsh
         run: |
-          $exe = "$env:GITHUB_WORKSPACE\build\bin\Release\QuizApp.exe"
-          if (-not (Test-Path $exe)) {
-            Get-ChildItem build -Recurse -Filter QuizApp.exe | Select-Object -ExpandProperty FullName
-            throw "QuizApp.exe was not produced at the expected path: $exe"
-          }
+          $exe = Get-ChildItem build -Recurse -File -Filter QuizApp.exe | Select-Object -First 1
+          if (-not $exe) { throw "QuizApp.exe was not produced by the build." }
+          "exe=$($exe.FullName)" >> $env:GITHUB_OUTPUT
+          "exe_dir=$($exe.DirectoryName)" >> $env:GITHUB_OUTPUT
 
       - name: Deploy Qt dependencies
         shell: pwsh
-        run: |
-          $exe = "$env:GITHUB_WORKSPACE\build\bin\Release\QuizApp.exe"
-          windeployqt --release --compiler-runtime $exe
+        run: windeployqt --release --compiler-runtime "${{ steps.locate.outputs.exe }}"
 
       - name: Package Windows application
         shell: pwsh
         run: |
-          $source = "$env:GITHUB_WORKSPACE\build\bin\Release"
-          Compress-Archive -Path "$source\*" -DestinationPath "$env:GITHUB_WORKSPACE\QuizApp-Windows-x64.zip"
+          Compress-Archive -Path "${{ steps.locate.outputs.exe_dir }}\*" -DestinationPath "$env:GITHUB_WORKSPACE\QuizApp-Windows-x64.zip"
 
       - name: Upload Windows package
         uses: actions/upload-artifact@v4
@@ -74,8 +78,10 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout
+      - name: Checkout release source
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag_name }}
 
       - name: Set up CMake 4.2
         uses: jwlawson/actions-setup-cmake@v2
@@ -110,7 +116,7 @@ jobs:
           exe="$(find build -type f -name QuizApp -perm -111 -print -quit)"
           if [[ -z "$exe" ]]; then
             echo "QuizApp executable was not produced. Build output:"
-            find build -maxdepth 5 -type f -print
+            find build -maxdepth 6 -type f -print
             exit 1
           fi
 
@@ -153,7 +159,7 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Attach packages to release
+      - name: Attach files to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name || inputs.tag_name }}
