@@ -4,6 +4,7 @@
 #include <QCheckBox>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QPushButton>
 #include <QLabel>
 #include <QVBoxLayout>
 
