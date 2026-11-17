@@ -9,9 +9,10 @@
 #include <QVBoxLayout>
 #include <QFont>
 #include <QStyle>
+#include <algorithm>
 
 StartPage::StartPage(const QList<int> &availableQuizzes, QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent), availableQuizzes(availableQuizzes)
 {
     setObjectName("startPage");
     setStyleSheet(R"(
@@ -31,6 +32,11 @@ StartPage::StartPage(const QList<int> &availableQuizzes, QWidget *parent)
         QPushButton#quizCard[completed="true"]:hover {
             background: #c6ebd0; border: 2px solid #21834a;
         }
+        QPushButton#resultsButton {
+            color: #173b3b; background: #ffc43d; border: 2px solid #d9a51f;
+            border-radius: 10px; padding: 13px 24px; font-weight: 800; min-height: 24px;
+        }
+        QPushButton#resultsButton:hover { background: #ffcf60; }
     )");
 
     auto *layout = new QVBoxLayout(this);
@@ -79,6 +85,13 @@ StartPage::StartPage(const QList<int> &availableQuizzes, QWidget *parent)
     for (int column = 0; column < 6; ++column) grid->setColumnStretch(column, 1);
     for (int row = 0; row < (quizButtons.size() + 1) / 2; ++row) grid->setRowStretch(row, 1);
     layout->addLayout(grid, 1);
+
+    resultsButton = new QPushButton("ПОСМОТРЕТЬ ИТОГИ  →", this);
+    resultsButton->setObjectName("resultsButton");
+    resultsButton->setCursor(Qt::PointingHandCursor);
+    resultsButton->setVisible(false);
+    connect(resultsButton, &QPushButton::clicked, this, &StartPage::showFinalResults);
+    layout->addWidget(resultsButton, 0, Qt::AlignHCenter);
 }
 
 void StartPage::resizeEvent(QResizeEvent *event)
@@ -104,6 +117,14 @@ void StartPage::resizeEvent(QResizeEvent *event)
 
 void StartPage::markQuizCompleted(int quizNumber)
 {
+    if (!completedQuizzes.contains(quizNumber))
+        completedQuizzes.append(quizNumber);
+
+    const bool allCompleted = !availableQuizzes.isEmpty()
+        && std::all_of(availableQuizzes.cbegin(), availableQuizzes.cend(),
+                       [this](int number) { return completedQuizzes.contains(number); });
+    resultsButton->setVisible(allCompleted);
+
     for (auto *button : quizButtons) {
         if (button->text().contains(QString("ТЕСТ № %1").arg(quizNumber, 2, 10, QChar('0')))) {
             button->setProperty("completed", true);
