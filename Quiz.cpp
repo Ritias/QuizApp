@@ -1,12 +1,14 @@
 #include "Quiz.h"
 #include "QuizPage.h"
 
+#include <QApplication>
 #include <QCheckBox>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 
 namespace {
 QList<int> chooseQuizzes(QWidget *parent)
@@ -50,12 +52,12 @@ QList<int> chooseQuizzes(QWidget *parent)
 
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok, &dialog);
     buttons->button(QDialogButtonBox::Ok)->setText("ПОДТВЕРДИТЬ");
-    buttons->button(QDialogButtonBox::Ok)->setEnabled(true);
     layout->addWidget(buttons, 0, Qt::AlignRight);
 
     auto updateSelectionState = [checks, buttons]() {
         int selected = 0;
-        for (const auto *check : checks) if (check->isChecked()) ++selected;
+        for (const auto *check : checks)
+            if (check->isChecked()) ++selected;
         buttons->button(QDialogButtonBox::Ok)->setEnabled(selected >= 2);
     };
     for (auto *check : checks)
@@ -70,32 +72,63 @@ QList<int> chooseQuizzes(QWidget *parent)
         if (checks[i]->isChecked()) selected.append(i + 1);
     return selected.size() >= 2 ? selected : QList<int>{1, 2, 3, 4};
 }
+
+const QString introCrawlHtml = QString::fromUtf8(R"HTML(
+    <body>
+        <p align="center"><b>ЭПИЗОД I</b></p>
+        <p align="center"><b>ПРОВЕРКА НАЧИНАЕТСЯ</b></p>
+        <p>Давным-давно, на одном далёком производстве...</p>
+        <p>Перед вами проверка знаний требований охраны труда. Впереди вопросы о безопасной работе, внимательности и ответственности.</p>
+        <p>Читайте задания внимательно, оценивайте возможные риски и выбирайте действия, которые помогают сохранить здоровье и жизнь.</p>
+        <p>Подготовьтесь к началу испытания.</p>
+    </body>
+)HTML");
+
+const QString finalCrawlHtml = QString::fromUtf8(R"HTML(
+    <body>
+        <p align="center"><b>ЭПИЗОД II</b></p>
+        <p align="center"><b>МИССИЯ ЗАВЕРШЕНА</b></p>
+        <p>Последний ответ дан. Результаты проверки знаний собраны и сохранены в рамках этой сессии.</p>
+        <p>Но безопасность не заканчивается вместе с тестированием. Каждый день требует внимания, соблюдения правил и готовности предупредить опасность.</p>
+        <p>Берегите себя и коллег. Пусть безопасная работа станет привычкой.</p>
+        <p align="center"><b>КОНЕЦ ПЕРЕДАЧИ</b></p>
+    </body>
+)HTML");
 }
 
 Quiz::Quiz(QWidget *parent) : QMainWindow(parent)
 {
-    const QList<int> availableQuizzes = chooseQuizzes(this);
+    availableQuizzes = chooseQuizzes(this);
     setupUI(availableQuizzes);
     setupConnections();
 }
 
-void Quiz::setupUI(const QList<int> &availableQuizzes)
+void Quiz::setupUI(const QList<int> &selectedQuizzes)
 {
     resize(1024, 768);
     setMinimumSize(680, 580);
     setWindowTitle("Охрана труда — проверка знаний");
+
     auto *central = new QWidget(this);
     central->setStyleSheet("background: #f8ffe5;");
     setCentralWidget(central);
+
     auto *rootLayout = new QVBoxLayout(central);
     rootLayout->setContentsMargins(0, 0, 0, 0);
+
     stack = new QStackedWidget(central);
-    start = new StartPage(availableQuizzes, stack);
+    start = new StartPage(selectedQuizzes, stack);
+    introTitles = new CrawlPage(introCrawlHtml, "НАЧАТЬ ТЕСТ  →", stack);
     quiz = new QuizPage(stack);
     end = new EndPage(stack);
+    finalTitles = new CrawlPage(finalCrawlHtml, "ЗАКРЫТЬ ПРИЛОЖЕНИЕ", stack);
+
     stack->addWidget(start);
+    stack->addWidget(introTitles);
     stack->addWidget(quiz);
     stack->addWidget(end);
+    stack->addWidget(finalTitles);
+
     rootLayout->addWidget(stack);
     stack->setCurrentWidget(start);
 }
@@ -103,20 +136,96 @@ void Quiz::setupUI(const QList<int> &availableQuizzes)
 void Quiz::setupConnections()
 {
     connect(start, &StartPage::goToQuiz, this, &Quiz::onGoToQuiz);
-    connect(quiz, &QuizPage::goToEnd, this, [this] { stack->setCurrentWidget(end); });
-    connect(end, &EndPage::goToStart, this, [this] { stack->setCurrentWidget(start); });
-    connect(quiz, &QuizPage::WrongAnsGive, this, [this] { res.addWrong(); });
+    connect(introTitles, &CrawlPage::proceed, this, &Quiz::startPendingQuiz);
+
+    connect(quiz, &QuizPage::WrongAnsGive, this, [this] {
+        res.addWrong();
+    });
     connect(quiz, &QuizPage::quizFinish, this, [this] {
         res.end();
-        end->setResults(res.getRows());
         start->markQuizCompleted(currentQuizNumber);
+        end->setResults(res.getRows(), availableQuizzes);
+    });
+    connect(quiz, &QuizPage::goToEnd, this, &Quiz::showPostQuizChoice);
+
+    connect(end, &EndPage::showFinalTitles, this, [this] {
+        stack->setCurrentWidget(finalTitles);
+    });
+    connect(finalTitles, &CrawlPage::proceed, this, [] {
+        QApplication::quit();
     });
 }
 
 void Quiz::onGoToQuiz(int num, const QString &file)
 {
     currentQuizNumber = num;
-    res.start(num);
-    quiz->loadQuiz(file);
+    currentQuizFile = file;
+    stack->setCurrentWidget(introTitles);
+}
+
+void Quiz::startPendingQuiz()
+{
+    if (currentQuizNumber < 1 || currentQuizFile.isEmpty()) {
+        stack->setCurrentWidget(start);
+        return;
+    }
+
+    res.start(currentQuizNumber);
+    quiz->loadQuiz(currentQuizFile);
     stack->setCurrentWidget(quiz);
+}
+
+void Quiz::showPostQuizChoice()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("Тест завершён");
+    dialog.setModal(true);
+    dialog.setMinimumWidth(450);
+    dialog.setStyleSheet(R"(
+        QDialog { background: #f8ffe5; }
+        QLabel { color: #173b3b; }
+        QLabel#dialogTitle { font-size: 20px; font-weight: 800; }
+        QLabel#dialogText { color: #415d5e; font-size: 14px; }
+        QPushButton {
+            color: #173b3b; background: #06d6a0; border: 1px solid #079f79;
+            border-radius: 9px; padding: 11px 20px; font-weight: 800; min-height: 28px;
+        }
+        QPushButton:hover { background: #42e5b9; }
+        QPushButton#finishAllButton {
+            background: #ffc43d; border-color: #d9a51f;
+        }
+        QPushButton#finishAllButton:hover { background: #ffcf60; }
+    )");
+
+    auto *layout = new QVBoxLayout(&dialog);
+    layout->setContentsMargins(26, 24, 26, 24);
+    layout->setSpacing(14);
+
+    auto *title = new QLabel("ТЕСТ ЗАВЕРШЁН", &dialog);
+    title->setObjectName("dialogTitle");
+    auto *message = new QLabel(
+        "Вы можете вернуться к выбору тестов или завершить всю сессию и посмотреть итоговую таблицу.",
+        &dialog);
+    message->setObjectName("dialogText");
+    message->setWordWrap(true);
+    layout->addWidget(title);
+    layout->addWidget(message);
+
+    auto *buttons = new QHBoxLayout;
+    auto *menuButton = new QPushButton("ВЕРНУТЬСЯ В МЕНЮ", &dialog);
+    auto *finishButton = new QPushButton("ЗАВЕРШИТЬ ВСЁ", &dialog);
+    finishButton->setObjectName("finishAllButton");
+    menuButton->setCursor(Qt::PointingHandCursor);
+    finishButton->setCursor(Qt::PointingHandCursor);
+
+    connect(menuButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+    connect(finishButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    buttons->addWidget(menuButton);
+    buttons->addWidget(finishButton);
+    layout->addLayout(buttons);
+
+    if (dialog.exec() == QDialog::Accepted)
+        stack->setCurrentWidget(end);
+    else
+        stack->setCurrentWidget(start);
 }
