@@ -109,11 +109,13 @@ void Quiz::setupConnections()
     connect(quiz, &QuizPage::quizFinish, this, [this] {
         res.end();
         end->setResults(res.getRows());
+        start->markQuizCompleted(currentQuizNumber);
     });
 }
 
 void Quiz::onGoToQuiz(int num, const QString &file)
 {
+    currentQuizNumber = num;
     res.start(num);
     quiz->loadQuiz(file);
     stack->setCurrentWidget(quiz);
