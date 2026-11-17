@@ -98,11 +98,12 @@ const QString finalCrawlHtml = QString::fromUtf8(R"HTML(
 
 Quiz::Quiz(QWidget *parent) : QMainWindow(parent)
 {
-    setupUI();
+    availableQuizzes = chooseQuizzes(this);
+    setupUI(availableQuizzes);
     setupConnections();
 }
 
-void Quiz::setupUI()
+void Quiz::setupUI(const QList<int> &selectedQuizzes)
 {
     resize(1024, 768);
     setMinimumSize(680, 580);
@@ -116,11 +117,13 @@ void Quiz::setupUI()
     rootLayout->setContentsMargins(0, 0, 0, 0);
 
     stack = new QStackedWidget(central);
-    introTitles = new CrawlPage(introCrawlHtml, "ПЕРЕЙТИ К ВЫБОРУ ТЕСТОВ  →", stack);
+    start = new StartPage(selectedQuizzes, stack);
+    introTitles = new CrawlPage(introCrawlHtml, "ПЕРЕЙТИ К ВЫБОРУ ТЕСТА  →", stack);
     quiz = new QuizPage(stack);
     end = new EndPage(stack);
     finalTitles = new CrawlPage(finalCrawlHtml, "ЗАКРЫТЬ ПРИЛОЖЕНИЕ", stack);
 
+    stack->addWidget(start);
     stack->addWidget(introTitles);
     stack->addWidget(quiz);
     stack->addWidget(end);
@@ -132,7 +135,8 @@ void Quiz::setupUI()
 
 void Quiz::setupConnections()
 {
-    connect(introTitles, &CrawlPage::proceed, this, &Quiz::showQuizSelection);
+    connect(start, &StartPage::goToQuiz, this, &Quiz::onGoToQuiz);
+    connect(introTitles, &CrawlPage::proceed, this, &Quiz::showQuizMenu);
 
     connect(quiz, &QuizPage::WrongAnsGive, this, [this] {
         res.addWrong();
@@ -152,19 +156,8 @@ void Quiz::setupConnections()
     });
 }
 
-void Quiz::showQuizSelection()
+void Quiz::showQuizMenu()
 {
-    availableQuizzes = chooseQuizzes(this);
-
-    if (start) {
-        stack->removeWidget(start);
-        start->deleteLater();
-        start = nullptr;
-    }
-
-    start = new StartPage(availableQuizzes, stack);
-    stack->addWidget(start);
-    connect(start, &StartPage::goToQuiz, this, &Quiz::onGoToQuiz);
     stack->setCurrentWidget(start);
 }
 
