@@ -1,0 +1,122 @@
+name: Build and publish QuizApp
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows version
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: qtmultimedia
+
+      - name: Configure CMake
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Deploy Qt dependencies
+        shell: pwsh
+        run: |
+          $exe = "$env:GITHUB_WORKSPACE\build\bin\Release\QuizApp.exe"
+          windeployqt --release --compiler-runtime $exe
+
+      - name: Package Windows application
+        shell: pwsh
+        run: |
+          $source = "build\bin\Release"
+          Compress-Archive -Path "$source\*" `
+            -DestinationPath "QuizApp-Windows-x64.zip"
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          path: QuizApp-Windows-x64.zip
+
+  build-linux:
+    name: Build Linux version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgl1 libegl1
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          modules: qtmultimedia
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Package Linux application
+        run: |
+          mkdir -p package
+
+          cp build/bin/QuizApp package/
+          cp -r build/bin/assets package/
+
+          cat > package/run.sh <<'EOF'
+          #!/bin/bash
+          SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+          cd "$SCRIPT_DIR"
+          exec ./QuizApp "$@"
+          EOF
+
+          chmod +x package/run.sh
+          chmod +x package/QuizApp
+
+          tar -czf QuizApp-Linux-x64.tar.gz -C package .
+
+      - name: Upload Linux package
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-package
+          path: QuizApp-Linux-x64.tar.gz
+
+  publish:
+    name: Attach files to GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-windows, build-linux]
+
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: dist/*
