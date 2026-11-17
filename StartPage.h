@@ -4,15 +4,16 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QList>
+
 class QResizeEvent;
 
 class StartPage : public QWidget {
     Q_OBJECT
 public:
-    explicit StartPage(QWidget *parent = nullptr);
+    explicit StartPage(const QList<int> &availableQuizzes, QWidget *parent = nullptr);
 
 signals:
-    void goToQuiz(int,const QString &file);
+    void goToQuiz(int, const QString &file);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
