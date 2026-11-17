@@ -37,6 +37,7 @@ private:
     QTimer *displayTimer;
     QElapsedTimer quizTimer;
     int wrongCount = 0;
+    bool currentQuestionSolved = false;
     void refreshStats();
 
     QMediaPlayer *goodPlayer = nullptr;
