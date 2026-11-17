@@ -3,28 +3,31 @@
 #include <QWidget>
 #include <QLabel>
 #include <QVector>
+#include <QList>
+
 #include "results.h"
 
-class QPushButton;
 class QResizeEvent;
+class QPushButton;
+class QTableWidget;
 
-class EndPage : public QWidget {
+class EndPage : public QWidget
+{
     Q_OBJECT
+
 public:
     explicit EndPage(QWidget *parent = nullptr);
-    void setResults(const QVector<Result> &results);
+    void setResults(const QVector<Result> &results, const QList<int> &selectedQuizzes);
 
 signals:
-    void goToStart();
+    void showFinalTitles();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    void showResults();
-    QVector<Result> quizResults;
-    QLabel *titleLabel;
-    QLabel *subtitleLabel;
-    QPushButton *resultsButton;
-    QPushButton *menuButton;
+    QLabel *titleLabel = nullptr;
+    QLabel *subtitleLabel = nullptr;
+    QTableWidget *resultsTable = nullptr;
+    QPushButton *finishButton = nullptr;
 };
