@@ -115,6 +115,33 @@ StarWarsCrawl::StarWarsCrawl(QWidget *parent)
 }
 
 
+
+void StarWarsCrawl::setCrawlHtml(const QString &html)
+{
+    timer_.stop();
+    started_ = false;
+    finishedEmitted_ = false;
+    progress_ = 0.0;
+
+    document_.setHtml(html);
+    document_.setTextWidth(TextWidth);
+    renderTextImage();
+    update();
+}
+
+void StarWarsCrawl::restart()
+{
+    timer_.stop();
+    started_ = false;
+    finishedEmitted_ = false;
+    progress_ = 0.0;
+
+    if (isVisible())
+        startCrawl();
+    else
+        update();
+}
+
 // ------------------------------------------------------------
 // 16:9 landscape viewport
 // ------------------------------------------------------------
