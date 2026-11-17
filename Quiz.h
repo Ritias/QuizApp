@@ -21,6 +21,7 @@ private:
     QuizPage* quiz;
     EndPage* end;
     Results res;
+    int currentQuizNumber = 0;
 private slots:
     void onGoToQuiz(int, const QString &file);
 };
