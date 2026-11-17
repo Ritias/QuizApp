@@ -18,9 +18,9 @@ public:
     explicit Quiz(QWidget* parent = nullptr);
 
 private:
-    void setupUI();
+    void setupUI(const QList<int> &selectedQuizzes);
     void setupConnections();
-    void showQuizSelection();
+    void showQuizMenu();
     void startPendingQuiz();
     void showPostQuizChoice();
 
