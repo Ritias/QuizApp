@@ -129,6 +129,7 @@ QuizPage::QuizPage(QWidget *parent) : QWidget(parent)
         }
         if (index >= questions.size()) {
             displayTimer->stop();
+            nextBtn->setText("СЛЕДУЮЩИЙ ВОПРОС  →");
             emit quizFinish();
             emit goToEnd();
         } else loadQuestion(index);
