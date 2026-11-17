@@ -1,6 +1,8 @@
 #include "EndPage.h"
 
 #include <QFont>
+#include <QtMath>
+#include <QAbstractItemView>
 #include <QHeaderView>
 #include <QPushButton>
 #include <QResizeEvent>
