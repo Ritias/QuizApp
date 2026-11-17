@@ -8,6 +8,7 @@
 #include <QSizePolicy>
 #include <QVBoxLayout>
 #include <QFont>
+#include <QStyle>
 
 StartPage::StartPage(const QList<int> &availableQuizzes, QWidget *parent)
     : QWidget(parent)
