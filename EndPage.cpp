@@ -72,10 +72,10 @@ EndPage::EndPage(QWidget *parent) : QWidget(parent)
         "QTableWidget { alternate-background-color: #f0f8ed; }");
     resultsTable->setMinimumHeight(220);
 
-    finishButton = new QPushButton("ЗАВЕРШИТЬ  →", this);
+    finishButton = new QPushButton("ЗАКРЫТЬ ПРИЛОЖЕНИЕ", this);
     finishButton->setObjectName("finishButton");
     finishButton->setCursor(Qt::PointingHandCursor);
-    connect(finishButton, &QPushButton::clicked, this, &EndPage::showFinalTitles);
+    connect(finishButton, &QPushButton::clicked, this, &EndPage::exitApplication);
 
     layout->addWidget(titleLabel);
     layout->addWidget(subtitleLabel);
