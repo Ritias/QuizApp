@@ -99,7 +99,7 @@ void EndPage::showResults()
     heading->setWordWrap(true);
     layout->addWidget(heading);
 
-    auto *table = new QTableWidget(4, 3, &dialog);
+    auto *table = new QTableWidget(latest.count(), 3, &dialog);
     table->setHorizontalHeaderLabels({"Тест", "Ошибки", "Время"});
     table->verticalHeader()->hide();
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -107,16 +107,11 @@ void EndPage::showResults()
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     table->setAlternatingRowColors(true);
     table->setStyleSheet("QTableWidget { alternate-background-color: #f0f8ed; }");
-    for (int quiz = 1; quiz <= 4; ++quiz) {
+    for (int quiz = 1; quiz <= latest.count(); ++quiz) {
         table->setItem(quiz - 1, 0, new QTableWidgetItem(QString("Тест № %1").arg(quiz)));
-        if (latest.contains(quiz)) {
-            const Result r = latest.value(quiz);
-            table->setItem(quiz - 1, 1, new QTableWidgetItem(QString::number(r.countWrong)));
-            table->setItem(quiz - 1, 2, new QTableWidgetItem(r.timeString()));
-        } else {
-            table->setItem(quiz - 1, 1, new QTableWidgetItem("—"));
-            table->setItem(quiz - 1, 2, new QTableWidgetItem("Не пройден"));
-        }
+        const Result r = latest.value(quiz);
+        table->setItem(quiz - 1, 1, new QTableWidgetItem(QString::number(r.countWrong)));
+        table->setItem(quiz - 1, 2, new QTableWidgetItem(r.timeString()));
         for (int col = 0; col < 3; ++col)
             table->item(quiz - 1, col)->setTextAlignment(Qt::AlignCenter);
     }

@@ -124,6 +124,9 @@ QuizPage::QuizPage(QWidget *parent) : QWidget(parent)
     connect(nextBtn, &QPushButton::clicked, this, [this]() {
         nextBtn->hide();
         ++index;
+        if (index == questions.size() - 1) {
+            nextBtn->setText("ЗАВЕРШИТЬ ПОПЫТКУ  →");
+        }
         if (index >= questions.size()) {
             displayTimer->stop();
             emit quizFinish();
