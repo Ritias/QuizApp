@@ -1,15 +1,33 @@
 #pragma once
-#include <QObject>
+
 #include <QWidget>
 #include <QLabel>
-#include<QPushButton>
+#include <QVector>
+#include <QList>
 
-class EndPage : public QWidget {
+#include "results.h"
+
+class QResizeEvent;
+class QPushButton;
+class QTableWidget;
+
+class EndPage : public QWidget
+{
     Q_OBJECT
+
 public:
     explicit EndPage(QWidget *parent = nullptr);
-private:
-    QLabel *label;
+    void setResults(const QVector<Result> &results, const QList<int> &selectedQuizzes);
+
 signals:
-    void goToStart();
+    void exitApplication();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
+private:
+    QLabel *titleLabel = nullptr;
+    QLabel *subtitleLabel = nullptr;
+    QTableWidget *resultsTable = nullptr;
+    QPushButton *finishButton = nullptr;
 };

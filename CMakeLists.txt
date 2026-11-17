@@ -12,10 +12,6 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia)
 
-# Per-config output directories. The POST_BUILD copy below uses
-# $<TARGET_FILE_DIR:QuizApp>, so assets follow the exe into bin/Debug or
-# bin/Release automatically. If you don't need the split, delete these three
-# lines and everything lands in ${CMAKE_BINARY_DIR}/bin.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY         "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_BINARY_DIR}/bin/Debug")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/Release")
@@ -30,16 +26,14 @@ add_executable(QuizApp
     QuizPage.h
     EndPage.cpp
     EndPage.h
+    CrawlPage.cpp
+    CrawlPage.h
     Answer.cpp
     Answer.h
     StarWarsCrawl.h StarWarsCrawl.cpp
-    # resources.qrc          # <-- uncomment if you switch to the .qrc approach
+    results.h results.cpp
 )
 
-# Copy assets next to the executable, every time the target rebuilds.
-# $<TARGET_FILE_DIR:...> is a generator expression: it evaluates at build
-# time to whatever CMAKE_RUNTIME_OUTPUT_DIRECTORY_* resolved to, so this
-# works for Debug, Release, single-config and multi-config generators.
 add_custom_command(TARGET QuizApp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/assets"

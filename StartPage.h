@@ -1,18 +1,33 @@
 #pragma once
 
-#include <QObject>
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
+#include <QList>
 
+class QResizeEvent;
 
 class StartPage : public QWidget {
     Q_OBJECT
 public:
-    explicit StartPage(QWidget *parent = nullptr);
+    explicit StartPage(const QList<int> &availableQuizzes, QWidget *parent = nullptr);
+    void markQuizCompleted(int quizNumber);
+
 signals:
-    void goToQuiz(const QString &file);
+    void showFinalResults();
+
+signals:
+    void goToQuiz(int, const QString &file);
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
 private:
+    QLabel *eyebrow;
     QLabel *label;
-    QPushButton *quizBtn;
+    QLabel *subtitle;
+    QList<QPushButton*> quizButtons;
+    QList<int> availableQuizzes;
+    QList<int> completedQuizzes;
+    QPushButton *resultsButton = nullptr;
 };
