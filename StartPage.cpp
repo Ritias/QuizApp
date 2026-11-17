@@ -24,6 +24,12 @@ StartPage::StartPage(const QList<int> &availableQuizzes, QWidget *parent)
         }
         QPushButton#quizCard:hover { background: #effcf5; border: 2px solid #1b9aaa; }
         QPushButton#quizCard:pressed { background: #dff8ed; }
+        QPushButton#quizCard[completed="true"] {
+            background: #d8f3dc; border: 2px solid #2d9b58; color: #155b35;
+        }
+        QPushButton#quizCard[completed="true"]:hover {
+            background: #c6ebd0; border: 2px solid #21834a;
+        }
     )");
 
     auto *layout = new QVBoxLayout(this);
@@ -53,6 +59,7 @@ StartPage::StartPage(const QList<int> &availableQuizzes, QWidget *parent)
         auto *quizBtn = new QPushButton(
             QString("ТЕСТ № %1\nОткрыть тест  →").arg(quizNumber, 2, 10, QChar('0')), this);
         quizBtn->setObjectName("quizCard");
+        quizBtn->setProperty("completed", false);
         quizBtn->setMinimumSize(150, 118);
         quizBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         quizBtn->setCursor(Qt::PointingHandCursor);
@@ -91,5 +98,18 @@ void StartPage::resizeEvent(QResizeEvent *event)
         button->setFont(QFont("Arial", cardSize, QFont::Bold));
         button->setMinimumSize(qMax(150, cardWidth * 9 / 10), qMax(118, cardHeight * 9 / 10));
         button->setMaximumSize(cardWidth, cardHeight);
+    }
+}
+
+void StartPage::markQuizCompleted(int quizNumber)
+{
+    for (auto *button : quizButtons) {
+        if (button->text().contains(QString("ТЕСТ № %1").arg(quizNumber, 2, 10, QChar('0')))) {
+            button->setProperty("completed", true);
+            button->style()->unpolish(button);
+            button->style()->polish(button);
+            button->update();
+            break;
+        }
     }
 }
