@@ -20,7 +20,7 @@ public:
     void setResults(const QVector<Result> &results, const QList<int> &selectedQuizzes);
 
 signals:
-    void showFinalTitles();
+    void exitApplication();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
