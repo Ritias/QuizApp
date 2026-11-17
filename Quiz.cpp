@@ -98,12 +98,11 @@ const QString finalCrawlHtml = QString::fromUtf8(R"HTML(
 
 Quiz::Quiz(QWidget *parent) : QMainWindow(parent)
 {
-    availableQuizzes = chooseQuizzes(this);
-    setupUI(availableQuizzes);
+    setupUI();
     setupConnections();
 }
 
-void Quiz::setupUI(const QList<int> &selectedQuizzes)
+void Quiz::setupUI()
 {
     resize(1024, 768);
     setMinimumSize(680, 580);
@@ -117,26 +116,23 @@ void Quiz::setupUI(const QList<int> &selectedQuizzes)
     rootLayout->setContentsMargins(0, 0, 0, 0);
 
     stack = new QStackedWidget(central);
-    start = new StartPage(selectedQuizzes, stack);
-    introTitles = new CrawlPage(introCrawlHtml, "НАЧАТЬ ТЕСТ  →", stack);
+    introTitles = new CrawlPage(introCrawlHtml, "ПЕРЕЙТИ К ВЫБОРУ ТЕСТОВ  →", stack);
     quiz = new QuizPage(stack);
     end = new EndPage(stack);
     finalTitles = new CrawlPage(finalCrawlHtml, "ЗАКРЫТЬ ПРИЛОЖЕНИЕ", stack);
 
-    stack->addWidget(start);
     stack->addWidget(introTitles);
     stack->addWidget(quiz);
     stack->addWidget(end);
     stack->addWidget(finalTitles);
 
     rootLayout->addWidget(stack);
-    stack->setCurrentWidget(start);
+    stack->setCurrentWidget(introTitles);
 }
 
 void Quiz::setupConnections()
 {
-    connect(start, &StartPage::goToQuiz, this, &Quiz::onGoToQuiz);
-    connect(introTitles, &CrawlPage::proceed, this, &Quiz::startPendingQuiz);
+    connect(introTitles, &CrawlPage::proceed, this, &Quiz::showQuizSelection);
 
     connect(quiz, &QuizPage::WrongAnsGive, this, [this] {
         res.addWrong();
@@ -156,11 +152,27 @@ void Quiz::setupConnections()
     });
 }
 
+void Quiz::showQuizSelection()
+{
+    availableQuizzes = chooseQuizzes(this);
+
+    if (start) {
+        stack->removeWidget(start);
+        start->deleteLater();
+        start = nullptr;
+    }
+
+    start = new StartPage(availableQuizzes, stack);
+    stack->addWidget(start);
+    connect(start, &StartPage::goToQuiz, this, &Quiz::onGoToQuiz);
+    stack->setCurrentWidget(start);
+}
+
 void Quiz::onGoToQuiz(int num, const QString &file)
 {
     currentQuizNumber = num;
     currentQuizFile = file;
-    stack->setCurrentWidget(introTitles);
+    startPendingQuiz();
 }
 
 void Quiz::startPendingQuiz()
