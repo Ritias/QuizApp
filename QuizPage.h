@@ -3,6 +3,8 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QProgressBar>
+#include <QElapsedTimer>
+#include <QTimer>
 #include "Answer.h"
 #include <QJsonObject>
 #include <QtMultimedia>
@@ -19,16 +21,23 @@ signals:
     void goToEnd();
     void WrongAnsGive();
     void quizFinish();
+
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
     QLabel *questionLabel;
     QLabel *progressLabel;
+    QLabel *timerLabel;
+    QLabel *wrongLabel;
     QProgressBar *progressBar;
     QList<Answer*> answers;
     QPushButton *nextBtn;
     QWidget *actionArea;
+    QTimer *displayTimer;
+    QElapsedTimer quizTimer;
+    int wrongCount = 0;
+    void refreshStats();
 
     QMediaPlayer *goodPlayer = nullptr;
     QAudioOutput *goodOut = nullptr;
