@@ -9,62 +9,34 @@
 #include <QVBoxLayout>
 #include <QFont>
 
-StartPage::StartPage(QWidget *parent)
+StartPage::StartPage(const QList<int> &availableQuizzes, QWidget *parent)
     : QWidget(parent)
 {
     setObjectName("startPage");
     setStyleSheet(R"(
-        QWidget#startPage {
-            background: #f8ffe5;
-        }
-        QLabel#eyebrow {
-            color: #1b9aaa;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-        QLabel#pageTitle {
-            color: #173b3b;
-            font-weight: 800;
-        }
-        QLabel#pageSubtitle {
-            color: #415d5e;
-        }
+        QWidget#startPage { background: #f8ffe5; }
+        QLabel#eyebrow { color: #1b9aaa; font-weight: 800; letter-spacing: 1px; }
+        QLabel#pageTitle { color: #173b3b; font-weight: 800; }
+        QLabel#pageSubtitle { color: #415d5e; }
         QPushButton#quizCard {
-            color: #173b3b;
-            text-align: left;
-            padding: 22px;
-            background: #ffffff;
-            border: 2px solid #d5e2d7;
-            border-radius: 12px;
-            font-weight: 800;
-            min-height: 118px;
+            color: #173b3b; text-align: left; padding: 22px; background: #ffffff;
+            border: 2px solid #d5e2d7; border-radius: 12px; font-weight: 800; min-height: 118px;
         }
-        QPushButton#quizCard:hover {
-            background: #effcf5;
-            border: 2px solid #1b9aaa;
-        }
-        QPushButton#quizCard:pressed {
-            background: #dff8ed;
-        }
+        QPushButton#quizCard:hover { background: #effcf5; border: 2px solid #1b9aaa; }
+        QPushButton#quizCard:pressed { background: #dff8ed; }
     )");
 
     auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(36, 30, 36, 30);
     layout->setSpacing(12);
-
     eyebrow = new QLabel("ОХРАНА ТРУДА  /  ПРОВЕРКА ЗНАНИЙ", this);
     eyebrow->setObjectName("eyebrow");
-
     label = new QLabel("БЕЗОПАСНОСТЬ НА ПРОИЗВОДСТВЕ", this);
     label->setObjectName("pageTitle");
     label->setWordWrap(true);
-
-    subtitle = new QLabel(
-        "Выберите тест по охране труда и проверьте свои знания.",
-        this);
+    subtitle = new QLabel("Выберите тест по охране труда и проверьте свои знания.", this);
     subtitle->setObjectName("pageSubtitle");
     subtitle->setWordWrap(true);
-
     layout->addWidget(eyebrow);
     layout->addWidget(label);
     layout->addWidget(subtitle);
@@ -75,61 +47,49 @@ StartPage::StartPage(QWidget *parent)
     grid->setHorizontalSpacing(22);
     grid->setVerticalSpacing(20);
 
-    for (int i = 1; i <= 4; ++i) {
+    int position = 0;
+    for (int quizNumber : availableQuizzes) {
+        if (quizNumber < 1 || quizNumber > 4) continue;
         auto *quizBtn = new QPushButton(
-            QString("ТЕСТ № %1\nОткрыть тест  →")
-                .arg(i, 2, 10, QChar('0')),
-            this);
+            QString("ТЕСТ № %1\nОткрыть тест  →").arg(quizNumber, 2, 10, QChar('0')), this);
         quizBtn->setObjectName("quizCard");
         quizBtn->setMinimumSize(150, 118);
         quizBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         quizBtn->setCursor(Qt::PointingHandCursor);
         quizButtons.append(quizBtn);
 
-        const QString filename = QString("questions_data_%1.json").arg(i);
-        connect(quizBtn, &QPushButton::clicked, this, [i, this, filename] {
-            emit goToQuiz(i, filename);
+        const QString filename = QString("questions_data_%1.json").arg(quizNumber);
+        connect(quizBtn, &QPushButton::clicked, this, [quizNumber, this, filename] {
+            emit goToQuiz(quizNumber, filename);
         });
 
-        // Two cards per row on a 6-column grid: each card spans 3 columns,
-        // giving an even 2x2 layout.
-        const int row    = (i - 1) / 2;          // 1,2 -> 0;  3,4 -> 1
-        const int column = ((i - 1) % 2) * 3;    // 1,3 -> 0;  2,4 -> 3
+        const int row = position / 2;
+        const int column = (position % 2) * 3;
         grid->addWidget(quizBtn, row, column, 1, 3, Qt::AlignCenter);
+        ++position;
     }
-
-    for (int column = 0; column < 6; ++column)
-        grid->setColumnStretch(column, 1);
-    grid->setRowStretch(0, 1);
-    grid->setRowStretch(1, 1);
-
+    for (int column = 0; column < 6; ++column) grid->setColumnStretch(column, 1);
+    for (int row = 0; row < (quizButtons.size() + 1) / 2; ++row) grid->setRowStretch(row, 1);
     layout->addLayout(grid, 1);
 }
 
 void StartPage::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
-
     const int margin = qBound(20, width() / 28, 48);
-    if (layout())
-        layout()->setContentsMargins(margin, qBound(18, height() / 24, 34),
-                                     margin, qBound(18, height() / 24, 34));
-
+    if (layout()) layout()->setContentsMargins(margin, qBound(18, height() / 24, 34), margin, qBound(18, height() / 24, 34));
     const int titleSize = qBound(24, width() / 32, 44);
     label->setFont(QFont("Arial", titleSize, QFont::Bold));
     eyebrow->setFont(QFont("Arial", qBound(12, width() / 75, 16), QFont::Bold));
     subtitle->setFont(QFont("Arial", qBound(15, width() / 65, 22)));
-
+    const int columns = qMin(2, quizButtons.size());
     const int cardSize = qBound(18, width() / 44, 30);
-    const int cardWidth = qMax(
-        176, qMin(500, (width() - 2 * margin - 70) / 2 - 14));
-    const int cardHeight = qMax(
-        132, qMin(230, (height() - 210) / 2));
-
+    const int cardWidth = qMax(176, qMin(500, (width() - 2 * margin - 70) / columns - 14));
+    const int rows = (quizButtons.size() + 1) / 2;
+    const int cardHeight = qMax(132, qMin(230, (height() - 210) / qMax(1, rows)));
     for (auto *button : quizButtons) {
         button->setFont(QFont("Arial", cardSize, QFont::Bold));
-        button->setMinimumSize(qMax(150, cardWidth * 9 / 10),
-                               qMax(118, cardHeight * 9 / 10));
+        button->setMinimumSize(qMax(150, cardWidth * 9 / 10), qMax(118, cardHeight * 9 / 10));
         button->setMaximumSize(cardWidth, cardHeight);
     }
 }
