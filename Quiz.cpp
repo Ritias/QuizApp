@@ -136,6 +136,9 @@ void Quiz::setupUI(const QList<int> &selectedQuizzes)
 void Quiz::setupConnections()
 {
     connect(start, &StartPage::goToQuiz, this, &Quiz::onGoToQuiz);
+    connect(start, &StartPage::showFinalResults, this, [this] {
+        stack->setCurrentWidget(end);
+    });
     connect(introTitles, &CrawlPage::proceed, this, &Quiz::showQuizMenu);
 
     connect(quiz, &QuizPage::WrongAnsGive, this, [this] {
