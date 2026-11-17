@@ -121,7 +121,7 @@ void Quiz::setupUI(const QList<int> &selectedQuizzes)
     introTitles = new CrawlPage(introCrawlHtml, "ПЕРЕЙТИ К ВЫБОРУ ТЕСТА  →", stack);
     quiz = new QuizPage(stack);
     end = new EndPage(stack);
-    finalTitles = new CrawlPage(finalCrawlHtml, "ЗАКРЫТЬ ПРИЛОЖЕНИЕ", stack);
+    finalTitles = new CrawlPage(finalCrawlHtml, "ПЕРЕЙТИ К ИТОГАМ  →", stack);
 
     stack->addWidget(start);
     stack->addWidget(introTitles);
@@ -137,7 +137,7 @@ void Quiz::setupConnections()
 {
     connect(start, &StartPage::goToQuiz, this, &Quiz::onGoToQuiz);
     connect(start, &StartPage::showFinalResults, this, [this] {
-        stack->setCurrentWidget(end);
+        stack->setCurrentWidget(finalTitles);
     });
     connect(introTitles, &CrawlPage::proceed, this, &Quiz::showQuizMenu);
 
@@ -151,10 +151,10 @@ void Quiz::setupConnections()
     });
     connect(quiz, &QuizPage::goToEnd, this, &Quiz::showPostQuizChoice);
 
-    connect(end, &EndPage::showFinalTitles, this, [this] {
-        stack->setCurrentWidget(finalTitles);
+    connect(finalTitles, &CrawlPage::proceed, this, [this] {
+        stack->setCurrentWidget(end);
     });
-    connect(finalTitles, &CrawlPage::proceed, this, [] {
+    connect(end, &EndPage::exitApplication, this, [] {
         QApplication::quit();
     });
 }
@@ -233,7 +233,7 @@ void Quiz::showPostQuizChoice()
     layout->addLayout(buttons);
 
     if (dialog.exec() == QDialog::Accepted)
-        stack->setCurrentWidget(end);
+        stack->setCurrentWidget(finalTitles);
     else
         stack->setCurrentWidget(start);
 }
